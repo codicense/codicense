@@ -1,0 +1,7 @@
+{
+  "name": "gpl-lib",
+  "version": "3.0.0",
+  "description": "Stub GPL library to demonstrate Codicense conflict detection in proprietary SaaS intent.",
+  "license": "GPL-3.0-or-later",
+  "main": "index.js"
+}

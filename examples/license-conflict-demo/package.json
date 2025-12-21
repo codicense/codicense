@@ -1,0 +1,19 @@
+{
+  "name": "license-conflict-demo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Demonstrates Codicense explain, fix, and intent-aware license intelligence",
+  "license": "UNLICENSED",
+  "keywords": [
+    "codicense",
+    "license-compliance",
+    "intent-aware",
+    "gpl",
+    "demo"
+  ],
+  "dependencies": {
+    "codicense": "^2.0.1",
+    "readline-sync": "^1.4.10",
+    "gpl-lib": "file:gpl-lib"
+  }
+}

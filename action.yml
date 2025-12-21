@@ -1,0 +1,144 @@
+name: 'CODICENSE License Scan'
+description: 'Intent-Aware License Intelligence scanning for your dependencies'
+author: 'CODICENSE Team'
+
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  fail-on:
+    description: 'Fail on these severity levels (critical,high,medium,low, or none)'
+    required: false
+    default: 'critical,high'
+  path:
+    description: 'Path to scan (relative to repo root)'
+    required: false
+    default: '.'
+  deterministic:
+    description: 'Enable deterministic mode for reproducible results'
+    required: false
+    default: 'false'
+  json-output:
+    description: 'Output results as JSON'
+    required: false
+    default: 'false'
+
+outputs:
+  result:
+    description: 'Scan result JSON'
+  exit-code:
+    description: 'Exit code (0 = success, 1 = issues found)'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install CODICENSE
+      shell: bash
+      run: |
+        npm install -g codicense@latest
+
+    - name: Run License Scan
+      shell: bash
+      working-directory: ${{ inputs.path }}
+      id: scan
+      run: |
+        set +e
+        
+        # Build command
+        CMD="codicense scan"
+        [[ "${{ inputs.json-output }}" == "true" ]] && CMD="$CMD --json"
+        [[ "${{ inputs.deterministic }}" == "true" ]] && CMD="$CMD --deterministic"
+        
+        # Run scan
+        SCAN_OUTPUT=$($CMD 2>&1)
+        SCAN_EXIT_CODE=$?
+        
+        # Output results
+        if [[ "${{ inputs.json-output }}" == "true" ]]; then
+          echo "result=$SCAN_OUTPUT" >> $GITHUB_OUTPUT
+        else
+          echo "$SCAN_OUTPUT"
+        fi
+        
+        # Check fail-on severities
+        if [[ "${{ inputs.fail-on }}" != "none" ]]; then
+          FAIL_LEVELS="${{ inputs.fail-on }}"
+          
+          # Count failures (basic check for severity keywords in output)
+          CRITICAL_COUNT=$(echo "$SCAN_OUTPUT" | grep -o -i "critical" | wc -l)
+          HIGH_COUNT=$(echo "$SCAN_OUTPUT" | grep -o -i "high" | wc -l)
+          
+          if [[ "$FAIL_LEVELS" == *"critical"* ]] && [[ $CRITICAL_COUNT -gt 0 ]]; then
+            echo "::error::Found critical license issues"
+            exit 1
+          fi
+          
+          if [[ "$FAIL_LEVELS" == *"high"* ]] && [[ $HIGH_COUNT -gt 0 ]]; then
+            echo "::error::Found high-severity license issues"
+            exit 1
+          fi
+        fi
+        
+        exit $SCAN_EXIT_CODE
+
+    - name: Summary
+      shell: bash
+      if: always()
+      run: |
+        echo "## CODICENSE Scan Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [[ ${{ steps.scan.outcome }} == 'success' ]]; then
+          echo "✓ **Status**: All checks passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✗ **Status**: Issues found" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "[View Full Scan Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+        exit 0
+
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const scanResult = JSON.parse('${{ steps.scan.outputs.scan_result }}');
+          
+          let body = '## CODICENSE License Compliance Report\n\n';
+          body += `**Risk Score:** ${scanResult.riskScore}/100\n\n`;
+          
+          if (scanResult.summary.conflicts === 0) {
+            body += '✓ **No license conflicts detected**\n\n';
+            body += `Scanned ${scanResult.summary.totalDependencies} dependencies.\n`;
+          } else {
+            body += `✗ **${scanResult.summary.conflicts} conflict(s) found**\n\n`;
+            body += '| Severity | Count |\n';
+            body += '|----------|-------|\n';
+            body += `| Critical | ${scanResult.summary.critical} |\n`;
+            body += `| High | ${scanResult.summary.high} |\n`;
+            body += `| Medium | ${scanResult.summary.medium} |\n`;
+            body += `| Low | ${scanResult.summary.low} |\n\n`;
+            
+            if (scanResult.conflicts.length > 0) {
+              body += '### Conflicts\n\n';
+              for (const conflict of scanResult.conflicts.slice(0, 3)) {
+                body += `**${conflict.severity}:** ${conflict.dependency.name}@${conflict.dependency.version} (${conflict.dependency.license})\n`;
+                body += `- ${conflict.reason}\n\n`;
+              }
+              
+              if (scanResult.conflicts.length > 3) {
+                body += `_...and ${scanResult.conflicts.length - 3} more_\n\n`;
+              }
+            }
+          }
+          
+          body += '\n---\n';
+          body += '<sub>Powered by [CODICENSE](https://codicense.com) | License Conflict Engine</sub>';
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
+

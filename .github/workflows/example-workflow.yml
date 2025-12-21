@@ -1,0 +1,33 @@
+name: License Compliance Check (Example - Disabled)
+
+# This is an example workflow for users of codicense
+# Disabled for the codicense repo itself
+on:
+  workflow_dispatch:
+
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: CODICENSE License Scan
+        run: npx codicense ci --fail-on critical,high
+      
+      - name: Upload scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: .codicense-report.json
+

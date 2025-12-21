@@ -1,0 +1,64 @@
+# Development files
+*.test.ts
+tests/
+scripts/
+corpus/
+test-project/
+
+# Documentation (excessive for npm)
+BUILD_SUMMARY.md
+DELIVERY_SUMMARY.md
+DEVELOPMENT_SUMMARY.md
+PHASE2_1_CHECKLIST.md
+PHASE2_1_COMPLETION_REPORT.md
+PHASE2_1_EXECUTIVE_SUMMARY.md
+PHASE2_1_STATUS.md
+PHASE2_SUMMARY.md
+STATUS.md
+VISUAL_SUMMARY.md
+COPILOT_PROMPT.md
+VALIDATION_QUICK_START.md
+VALIDATION_REPORT_TEMPLATE.md
+VALIDATION_REPORT.md
+GETTING_STARTED_VALIDATION.md
+DOCUMENTATION_INDEX.md
+README_PHASE2_1_COMPLETE.md
+semantic-validation-prompt.md
+report.json
+
+# Development config
+.eslintrc.js
+.prettierrc.js
+vitest.config.ts
+tsconfig.json
+.github/
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Build artifacts (keep dist/)
+*.tsbuildinfo
+coverage/
+node_modules/
+
+# Runtime files
+*.log
+.DS_Store
+.env
+.env.local
+
+# Keep only these essentials:
+# README.md
+# LICENSE
+# CHANGELOG.md
+# CONTRIBUTING.md
+# SECURITY.md
+# package.json
+# dist/
+# docs/
+# src/
+# action.yml
+# banner.txt
+# CODICENSE PRD.md (product documentation)
+

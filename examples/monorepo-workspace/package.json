@@ -1,0 +1,16 @@
+{
+  "name": "example-monorepo-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "pnpm workspace monorepo example",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6",
+    "eslint": "^8.53.0",
+    "prettier": "^3.0.3"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "version": "1.1",
+  "projectContext": {
+    "projectLicense": "UNLICENSED",
+    "intent": "proprietary",
+    "distributionModel": "saas",
+    "linkingModel": "static",
+    "futureFlexibility": true,
+    "detectedFrom": "config"
+  },
+  "guidedMode": false,
+  "educationalMode": false,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "lastUpdated": "2024-01-01T00:00:00.000Z"
+}

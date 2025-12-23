@@ -4,7 +4,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![CI Status](https://github.com/codicense/codicense/actions/workflows/ci.yml/badge.svg)](https://github.com/codicense/codicense/actions/workflows/ci.yml)
 
-Deterministic, offline license intelligence for JavaScript, Python, and Go. Runs entirely locally. Explains why license risk exists. Ranks fixes by impact. Stays predictable.
+An offline CLI that analyzes dependency license data and explains risk and impact. Runs locally and does not make network requests.
 
 ## What Codicense Does
 
@@ -13,13 +13,13 @@ Codicense answers the core question: **Which single change removes the most lice
 It scans your dependency graph, detects license conflicts, traces how conflicts propagate through transitive dependencies, and ranks fixes by causality: the package that, if removed or replaced, eliminates the most risk.
 
 - **Offline**: No cloud, no API calls, no tracking
-- **Deterministic**: Same input, same output, every time
+- **Deterministic analysis**: Same dependencies and config produce the same findings
 - **Transparent**: Shows entry points, propagation paths, and impact
-- **Decision-driven**: Not reporting. Fix ranking by outcome, not just severity.
+  Fix ranking is informational; you choose what to change.
 
 ## Capabilities
 
-- **Multi-ecosystem scanning**: npm/Yarn/pnpm, Pip/Poetry/Pipenv, Go modules
+- **JavaScript scanning**: npm/Yarn/pnpm lockfiles
 - **Conflict path visualization**: Full dependency chains with entry-point markers
 - **Causal impact analysis**: See which packages contribute most risk
 - **Diff-aware scans**: Compare scans to detect what changed and why
@@ -48,7 +48,7 @@ codicense fix foo --with alternative@1.0.0  # Apply a fix
 ## Commands
 
 - `codicense init [--auto] [--strict]` - Set project intent; `--strict` disables heuristics
-- `codicense scan [--json|--format markdown|table|sbom|summary] [--visualize] [--diff] [--hotspots] [--confidence] [--hints]` - Scan dependencies
+- `codicense scan [--json|--format markdown|table|sbom|summary] [--diff] [--hotspots] [--confidence] [--hints]` - Scan dependencies
 - `codicense explain <package|conflict-id|license>` - Show conflict details, path, obligations
 - `codicense fix <package> --with <pkg@ver>` - Generate and apply fixes
 - `codicense obligations <license>` - Explain license obligations
@@ -74,15 +74,13 @@ codicense fix foo --with alternative@1.0.0  # Apply a fix
 ## Determinism and Transparency
 
 - **Offline by default**: No telemetry, no cloud, no registration
-- **Deterministic output**: Same input always produces the same output
+- **Deterministic analysis**: Findings (conflicts, severities, counts, risk score) are deterministic for a given lockfile and configuration
+- **Metadata**: Timestamps and IDs are non-deterministic by default; set CODICENSE_DETERMINISTIC=1 to make them reproducible
 - **Explainable scoring**: See why each license was detected and how it was classified
-- **Causal ranking**: Fixes ranked by measurable impact on overall risk
 
-## Supported Languages and Lockfiles
+## Supported Ecosystem
 
 - **JavaScript/TypeScript**: `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`
-- **Python**: `requirements.txt`, `Pipfile.lock`, `poetry.lock`
-- **Go**: `go.mod`, `go.sum`
 
 ## Configuration
 
@@ -99,9 +97,21 @@ Codicense stores project context in `.codicense/config.json`:
 
 Create or update with `codicense init`.
 
+## What Codicense Is / Is Not
+
+Is:
+- An offline CLI for analyzing dependency license data from lockfiles
+- Deterministic within the documented scope
+- Focused on explaining conflicts, paths, obligations, and impact
+
+Is not:
+- An enforcer or decision-maker
+- A service, telemetry system, or networked tool
+- A Python/Go license scanner
+
 ## Examples
 
-See `examples/` for ready-to-run projects demonstrating scanning, conflict resolution, and multi-package workflows.
+See `examples/` for projects demonstrating scanning and reports.
 
 ## License
 

@@ -23,7 +23,6 @@ codicense scan --format markdown      # Markdown report
 codicense scan --format table         # Table view
 codicense scan --format sbom          # CycloneDX SBOM
 codicense scan --format summary       # GitHub Actions summary
-codicense scan --visualize            # Show dependency trees
 codicense scan --diff                 # Compare with previous scan
 codicense scan --hotspots             # Show risk contributors
 codicense scan --confidence           # Show license confidence
@@ -110,10 +109,16 @@ codicense trend --clear             # Clear history
 ```
 
 Shows risk direction (improving, worsening, stable) based on local scan history.
+
+## codicense ci
+
+Run scan in CI mode and fail based on severity levels.
+
+```bash
 codicense ci                                # Default: fail on critical,high
 codicense ci --fail-on critical,high,medium # Custom fail levels
 codicense ci --fail-on none                 # Never fail (report only)
 ```
 
-Outputs JSON by default in CI mode.
+Outputs JSON by default. No emojis or decorative output is used.
 

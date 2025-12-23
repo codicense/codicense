@@ -1,7 +1,7 @@
 /**
  * Integration Layer - Bridges ILI with existing conflict detection
  * 
- * Wraps conflict detection with intent-aware intelligence.
+ * Wraps conflict detection with intent-aware analysis.
  */
 
 import type { DependencyNode, ProjectConfig, ScanResult, Conflict } from '../types';
@@ -127,6 +127,9 @@ export class ILIScanner {
         conflictPath,
       });
     }
+
+    // Ensure stable ordering for deterministic output
+    enhancedConflicts.sort((a, b) => a.dependency.name.localeCompare(b.dependency.name));
 
     // Recalculate risk score based on dynamic severity
     const riskScore = this.calculateDynamicRisk(enhancedConflicts);

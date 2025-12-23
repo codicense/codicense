@@ -1,12 +1,17 @@
 {
   "name": "codicense",
-  "version": "3.0.0",
-  "description": "Intent-aware license compliance CLI for JS/TS, Python, and Go",
+  "version": "1.0.0",
+  "description": "An offline CLI that analyzes dependency license data and explains risk and impact.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "codicense": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

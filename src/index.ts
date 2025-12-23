@@ -6,14 +6,13 @@
 export * from './types';
 export { LicenseDatabase, licenseDb } from './license-db';
 export { ConflictDetector } from './engine/conflict-detector';
-export { FixGenerator } from './engine/fix-generator';
 export { CompatibilityMatrix } from './engine/compatibility-matrix';
 export { LockfileParser } from './parsers/lockfile-parser';
 export { WorkspaceDetector } from './parsers/workspace-detector';
 export { OutputFormatter } from './visualizer/output-formatter';
 export { ILIScanner } from './engine/ili-scanner';
 
-// New v3.0.0 exports
+// Public exports
 export { DiffEngine } from './engine/diff-engine';
 export { ConfidenceDetector } from './engine/confidence-detector';
 export { HotspotsAnalyzer } from './engine/hotspots-analyzer';

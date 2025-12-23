@@ -10,8 +10,8 @@ const program = new Command();
 
 program
   .name("codicense")
-  .description("Intent-aware license compliance CLI")
-  .version("3.0.0")
+  .description("Offline CLI to analyze dependency license data and explain risk and impact")
+  .version("1.0.0")
   .option("--json", "Output machine-readable JSON")
   .option("--format <type>", "Output format: text, json, markdown, table, sbom")
   .option("--no-color", "Disable colored output");

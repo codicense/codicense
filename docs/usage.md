@@ -53,11 +53,9 @@ codicense scan --json
 ## CI/CD Integration
 
 ```bash
-# Fail on critical and high severity
-codicense scan --json | jq '.summary'
+# Fail on critical and high severities in CI
+codicense ci --fail-on critical,high --json > codicense-report.json
 ```
-
-Or integrate with GitHub Actions for automatic scanning.
 
 ## Viewing History
 

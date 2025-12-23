@@ -8,6 +8,7 @@ import type {
 } from '../types';
 import { compatibilityMatrix } from './compatibility-matrix';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { licenseFixEngine } from '../licensefix/index.js';
 
 /**
@@ -134,9 +135,16 @@ export class ConflictDetector {
     }
   ): Conflict {
     const license = Array.isArray(node.license) ? node.license[0] : node.license;
+    const id = this.isDeterministic()
+      ? `conflict-${crypto
+          .createHash('sha1')
+          .update(`${node.name}@${node.version}|${license}|${node.path.join('>')}`)
+          .digest('hex')
+          .slice(0, 8)}`
+      : `conflict-${uuidv4().substring(0, 8)}`;
 
     return {
-      id: `conflict-${uuidv4().substring(0, 8)}`,
+      id,
       severity,
       dependency: {
         name: node.name,
@@ -275,6 +283,10 @@ export class ConflictDetector {
   private severityWeight(severity: Severity): number {
     const weights = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
     return weights[severity];
+  }
+
+  private isDeterministic(): boolean {
+    return process.env.CODICENSE_DETERMINISTIC === '1';
   }
 }
 

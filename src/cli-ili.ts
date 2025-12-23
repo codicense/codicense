@@ -1,7 +1,7 @@
 /**
- * Enhanced CLI Commands - ILI Integration
+ * CLI Commands - ILI Integration
  * 
- * CLI commands for intent-aware license scanning with all Tier 1-4 features.
+ * CLI commands for intent-aware license analysis.
  */
 
 import { Command } from 'commander';
@@ -62,7 +62,7 @@ export function createInitCommand(_colorEnabled: boolean, _silentMode: boolean):
         
         await scanner.saveContext(context);
         
-        console.log(chalk.green('\n✅ Configuration created'));
+        console.log(chalk.green('\nConfiguration created'));
         console.log(chalk.dim(`Intent: ${context.intent}`));
         console.log(chalk.dim(`License: ${context.projectLicense || 'UNKNOWN'}`));
         
@@ -165,16 +165,16 @@ export function createInitCommand(_colorEnabled: boolean, _silentMode: boolean):
 
         await scanner.saveContext(context);
 
-        console.log(chalk.green('\n✅ Configuration saved to .codicense/config.json'));
+          console.log(chalk.green('\nConfiguration saved to .codicense/config.json'));
         
         // Show policy hints based on selections
         const policyAnalysis = PolicyHintsEngine.analyze(context);
         if (policyAnalysis.hints.length > 0) {
-          console.log(chalk.cyan('\n💡 Policy Hints:\n'));
+            console.log(chalk.cyan('\nPolicy hints:\n'));
           console.log(PolicyHintsEngine.format(policyAnalysis));
         }
         
-        console.log(chalk.dim('\nRun `codicense scan` to analyze your dependencies'));
+          console.log(chalk.dim('\nRun `codicense scan` to analyze your dependencies'));
 
       } catch (error) {
         rl.close();
@@ -188,10 +188,9 @@ export function createInitCommand(_colorEnabled: boolean, _silentMode: boolean):
  */
 export function createScanCommand(colorEnabled: boolean, silentMode: boolean): Command {
   return new Command('scan')
-    .description('Scan project with Intent-Aware License Intelligence')
+    .description('Scan project dependencies and report license conflicts')
     .option('--json', 'Output results as JSON')
     .option('--format <type>', 'Output format: text, json, markdown, table, sbom, summary')
-    .option('--visualize', 'Show ASCII dependency trees')
     .option('--diff [ref]', 'Compare with previous scan or git ref (e.g., HEAD~1)')
     .option('--hotspots', 'Show risk hotspots analysis')
     .option('--confidence', 'Show license confidence scores')
@@ -250,7 +249,7 @@ export function createScanCommand(colorEnabled: boolean, silentMode: boolean): C
             };
 
             const diffResult = DiffEngine.compare(previousScanSnapshot, result);
-            console.log(chalk.cyan('\n📊 Diff Analysis\n'));
+            console.log(chalk.cyan('\nDiff analysis\n'));
             console.log(DiffEngine.formatDiff(diffResult));
             console.log();
           } else {
@@ -366,7 +365,7 @@ export function createScanCommand(colorEnabled: boolean, silentMode: boolean): C
           
           case 'text':
           default:
-            displayILIResult(result, options.visualize || false, colorEnabled, options.confidence || false);
+            displayILIResult(result, colorEnabled, options.confidence || false);
             break;
         }
 
@@ -412,7 +411,7 @@ export function createScanCommand(colorEnabled: boolean, silentMode: boolean): C
  */
 export function createExplainCommand(colorEnabled: boolean): Command {
   return new Command('explain')
-    .description('Explain a specific license conflict or license in detail')
+    .description('Explain a specific license conflict or license')
     .argument('<conflict-id-or-package-or-license>', 'Conflict ID, package name, or license (e.g., GPL-3.0)')
     .option('--obligations', 'Show detailed license obligations')
     .action(async (target: string, _options: { obligations?: boolean }) => {
@@ -422,7 +421,7 @@ export function createExplainCommand(colorEnabled: boolean): Command {
       const licensePattern = /^[A-Za-z0-9.-]+$/;
       if (licensePattern.test(target) && (target.includes('-') || ['MIT', 'ISC', 'BSD', 'Apache'].some(l => target.toUpperCase().startsWith(l.toUpperCase())))) {
         // Show license obligations
-        console.log(chalk.cyan(`\n📜 License Explanation: ${target}\n`));
+        console.log(chalk.cyan(`\nLicense explanation: ${target}\n`));
         console.log(ObligationsExplainer.formatObligations(target));
         return;
       }
@@ -445,7 +444,7 @@ export function createExplainCommand(colorEnabled: boolean): Command {
       }
 
       // Display detailed explanation
-      console.log(chalk.cyan(`\n📋 Conflict Details: ${conflict.id}\n`));
+      console.log(chalk.cyan(`\nConflict details: ${conflict.id}\n`));
       console.log(chalk.bold('Dependency:'), conflict.dependency.name);
       console.log(chalk.bold('License:'), conflict.dependency.license);
       console.log(chalk.bold('Severity:'), formatDynamicSeverity(conflict.dynamicSeverity, colorEnabled));
@@ -453,15 +452,15 @@ export function createExplainCommand(colorEnabled: boolean): Command {
       console.log(chalk.bold('\nExplanation:'), conflict.dynamicSeverity.contextualExplanation);
       
       // Show license obligations
-      console.log(chalk.bold('\n📜 License Obligations:\n'));
+      console.log(chalk.bold('\nLicense obligations:\n'));
       console.log(ObligationsExplainer.getShortSummary(conflict.dependency.license));
       
-      console.log(chalk.bold('\n⚡ Fix Suggestions:\n'));
+      console.log(chalk.bold('\nFix suggestions:\n'));
       
       // Check for upgrade fix first
       const upgradeFix = conflict.fixSuggestions.find(f => f.strategy === 'upgrade');
       if (upgradeFix) {
-        console.log(chalk.green('1. ' + upgradeFix.description + ' (RECOMMENDED)'));
+        console.log(chalk.green('1. ' + upgradeFix.description + ' (recommended)'));
         console.log(chalk.dim(`   ${upgradeFix.implementation}`));
         console.log();
       }
@@ -476,7 +475,7 @@ export function createExplainCommand(colorEnabled: boolean): Command {
       });
 
       // Show conflict path
-      console.log(chalk.bold('🔗 Dependency Path:\n'));
+      console.log(chalk.bold('Dependency path:\n'));
       console.log(ASCIIVisualizer.renderConflictTree(
         conflict.conflictPath,
         'your-project',
@@ -485,7 +484,7 @@ export function createExplainCommand(colorEnabled: boolean): Command {
       
       // Show how risk entered the graph
       if (conflict.conflictPath.path.length > 2) {
-        console.log(chalk.dim('\n💡 This conflict entered through transitive dependencies.'));
+        console.log(chalk.dim('\nNote: This conflict entered through transitive dependencies.'));
         console.log(chalk.dim('   The direct dependency is: ' + conflict.conflictPath.path[1]));
       }
     });
@@ -616,7 +615,7 @@ export function createFixCommand(_colorEnabled: boolean): Command {
  */
 export function createBadgeCommand(): Command {
   return new Command('badge')
-    .description('Generate license compliance badges for your README')
+    .description('Generate license status badges')
     .option('--format <type>', 'Badge format: markdown, html, rst, url', 'markdown')
     .option('--style <style>', 'Badge style: flat, flat-square, plastic, for-the-badge', 'flat')
     .action(async (options) => {
@@ -637,7 +636,7 @@ export function createBadgeCommand(): Command {
         format
       ));
       
-      console.log(chalk.dim('\n--- All badges ---\n'));
+      console.log(chalk.dim('\nAll badges:\n'));
       const badges = BadgeGenerator.generateAll(
         result.riskScore,
         result.enhancedConflicts.length,
@@ -673,7 +672,7 @@ export function createTrendCommand(): Command {
       
       // Show trend analysis
       const trends = history.analyzeTrends();
-      console.log(chalk.cyan('\n📈 Risk Trends\n'));
+      console.log(chalk.cyan('\nRisk trends\n'));
       console.log(ScanHistory.formatTrends(trends));
     });
 }
@@ -686,7 +685,7 @@ export function createObligationsCommand(): Command {
     .description('Show plain-English explanation of license obligations')
     .argument('<license>', 'License identifier (e.g., GPL-3.0, MIT, Apache-2.0)')
     .action(async (license: string) => {
-      console.log(chalk.cyan(`\n📜 License Obligations: ${license}\n`));
+      console.log(chalk.cyan(`\nLicense obligations: ${license}\n`));
       console.log(ObligationsExplainer.formatObligations(license));
     });
 }
@@ -694,8 +693,8 @@ export function createObligationsCommand(): Command {
 /**
  * Display ILI scan result with confidence scores
  */
-function displayILIResult(result: ILIScanResult, _visualize: boolean, _colorEnabled: boolean, showConfidence: boolean = false): void {
-  console.log(chalk.cyan('\n🎯 Scan Results\n'));
+function displayILIResult(result: ILIScanResult, _colorEnabled: boolean, showConfidence: boolean = false): void {
+  console.log(chalk.cyan('\nScan results\n'));
   
   console.log(chalk.bold('Project Context:'));
   console.log(`  Intent: ${result.projectContext.intent}`);
@@ -713,7 +712,7 @@ function displayILIResult(result: ILIScanResult, _visualize: boolean, _colorEnab
     console.log(chalk.bold('Conflicts:\n'));
     
     for (const conflict of result.enhancedConflicts) {
-      console.log(chalk.red(`❌ ${conflict.dependency.name} (${conflict.dependency.license})`));
+      console.log(chalk.red(`${conflict.dependency.name} (${conflict.dependency.license})`));
       
       // Show confidence if requested
       if (showConfidence) {
@@ -753,9 +752,9 @@ function displayILIResult(result: ILIScanResult, _visualize: boolean, _colorEnab
       // Show upgrade fix prominently if available
       const upgradeFix = conflict.fixSuggestions.find(f => f.strategy === 'upgrade');
       if (upgradeFix) {
-        console.log(chalk.green(`   ✔ ${upgradeFix.description}`));
+        console.log(chalk.green(`   ${upgradeFix.description}`));
       } else {
-        console.log(chalk.yellow(`   ⚡ Fix: ${conflict.fixSuggestions[0]?.description}`));
+        console.log(chalk.yellow(`   Fix: ${conflict.fixSuggestions[0]?.description}`));
       }
 
       // Show ranked fixes with effort and tradeoffs
@@ -782,11 +781,11 @@ function displayILIResult(result: ILIScanResult, _visualize: boolean, _colorEnab
       console.log();
     }
 
-    console.log(chalk.dim(`\nRun \`codicense explain <id|package>\` for detailed conflict analysis`));
-    console.log(chalk.dim(`Run \`codicense fix <id|package> --dry-run\` to preview fixes`));
-    console.log(chalk.dim(`Run \`codicense scan --hotspots\` to see risk contributors`));
+        console.log(chalk.dim(`\nRun \`codicense explain <id|package>\` for details`));
+      console.log(chalk.dim(`Run \`codicense fix <id|package> --dry-run\` to preview fixes`));
+      console.log(chalk.dim(`Run \`codicense scan --hotspots\` to see risk contributors`));
   } else {
-    console.log(chalk.green('✅ No license conflicts detected'));
+    console.log(chalk.green('No license conflicts detected'));
   }
 }
 
@@ -821,18 +820,8 @@ function formatEffort(effort: 'low' | 'medium' | 'high'): string {
 /**
  * Format dynamic severity
  */
-function formatDynamicSeverity(severity: DynamicSeverity, colorEnabled: boolean): string {
-  if (!colorEnabled) return severity.level;
-  
-  const icons: Record<string, string> = {
-    critical: '🔴',
-    high: '🟠',
-    medium: '🟡',
-    low: '🔵',
-    safe: '✅',
-  };
-
-  return `${icons[severity.level]} ${severity.level.toUpperCase()} - ${severity.reason}`;
+function formatDynamicSeverity(severity: DynamicSeverity, _colorEnabled: boolean): string {
+  return `${severity.level.toUpperCase()} - ${severity.reason}`;
 }
 
 /**

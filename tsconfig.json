@@ -21,6 +21,14 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "src/engine/github-pr-generator.ts",
+    "src/engine/fix-generator.ts",
+    "src/parsers/go-parser.ts",
+    "src/parsers/python-parser.ts"
+  ]
 }
 

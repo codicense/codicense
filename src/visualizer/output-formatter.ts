@@ -120,17 +120,18 @@ export class OutputFormatter {
       purl: `pkg:npm/${dep.name}@${dep.version}`
     }));
 
+    const deterministic = process.env.CODICENSE_DETERMINISTIC === '1';
     const sbom = {
       bomFormat: 'CycloneDX',
       specVersion: '1.4',
       version: 1,
       metadata: {
-        timestamp: new Date().toISOString(),
+        timestamp: deterministic ? '2000-01-01T00:00:00.000Z' : new Date().toISOString(),
         tools: [
           {
             vendor: 'Codicense',
             name: 'codicense',
-            version: '2.0.3'
+            version: '1.0.0'
           }
         ],
         component: {
@@ -157,31 +158,28 @@ export class OutputFormatter {
   static toGitHubSummary(result: ScanResult): string {
     const lines: string[] = [];
     
-    lines.push('## 🔍 License Compliance Scan');
+    lines.push('## License Compliance Scan');
     lines.push('');
     
-    const status = result.conflicts.length === 0 ? '✅ PASS' : '❌ FAIL';
-    const emoji = result.conflicts.length === 0 ? '✅' : '⚠️';
+    const status = result.conflicts.length === 0 ? 'PASS' : 'FAIL';
     
     lines.push(`### ${status}`);
     lines.push('');
     lines.push('| Metric | Value |');
     lines.push('|--------|-------|');
     lines.push(`| Total Dependencies | ${result.summary.totalDependencies} |`);
-    lines.push(`| License Conflicts | ${emoji} ${result.summary.conflicts} |`);
+    lines.push(`| License Conflicts | ${result.summary.conflicts} |`);
     lines.push(`| Risk Score | ${result.summary.riskScore}/100 |`);
     lines.push('');
     
     if (result.conflicts.length > 0) {
-      lines.push('### ⚠️ Conflicts Detected');
+      lines.push('### Conflicts Detected');
       lines.push('');
       lines.push('| Package | Version | License | Severity | Reason |');
       lines.push('|---------|---------|---------|----------|--------|');
       
       for (const conflict of result.conflicts) {
-        const severityEmoji = conflict.severity === 'CRITICAL' ? '🔴' : 
-                             conflict.severity === 'HIGH' ? '🟠' : '🟡';
-        lines.push(`| ${conflict.dependency.name} | ${conflict.dependency.version} | ${conflict.dependency.license} | ${severityEmoji} ${conflict.severity} | ${conflict.reason} |`);
+        lines.push(`| ${conflict.dependency.name} | ${conflict.dependency.version} | ${conflict.dependency.license} | ${conflict.severity} | ${conflict.reason} |`);
       }
       lines.push('');
     }
